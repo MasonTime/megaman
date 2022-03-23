@@ -1,10 +1,12 @@
 import kaboom from "kaboom"
 
 kaboom({
-	width:128,
-	height:128,
-	scale:3,
+	width:640,
+	height:640,
+	scale:1,
 })
+
+loadSprite("susan", "sprites/susan.png")
 
 //the levels
 const levels = [
@@ -67,6 +69,8 @@ const levels = [
 //puts the length of the levels array into a variable (variable scope is stupid)
 const levelLeng = levels.length
 
+var levelWidth = levelLeng * width()
+
 //common game objects to add
 function createBullet(X,Y,dir) {
 	//function that creates a bullet
@@ -74,36 +78,37 @@ function createBullet(X,Y,dir) {
 	let DX;
 	let DY;
 	let y;
-	let spd = 200;
+	let spd = 1000;
 	
 	switch(dir) {
 		case "r":
-			x = X+8;
+			x = X+40;
 			y = Y;
 			DX = spd;
 			DY = 0;
 			break;
 		case "l":
-			x = X-4;
+			x = X-40;
 			y = Y;
 			DX = -spd;
 			DY = 0;
 			break;
 		case "u":
 			x = X;
-			y = Y-4;
+			y = Y-40;
 			DY = -spd;
 			DX = 0;
 			break;
 		case "d":
 			x = X;
-			y = Y+12;
+			y = Y+60;
 			DY = spd;
 			DX = 0;
 	}
 
 	add([
-		rect(4,4),
+		rect(20,20),
+		scale(.5),
 		color(0,255,0),
 		area(),
 		pos(x,y),
@@ -122,13 +127,13 @@ scene("game", () => {
 
 	for (i = 0; i < levelLeng; i++) {
 		addLevel(levels[i],{
-			width:8,
-			height:8,
-			pos:vec2((i)*128,0),
+			width:40,
+			height:40,
+			pos:vec2((i)*width(),0),
 			
 			"=": () => [
 				//wall
-				rect(8,8),
+				rect(40,40),
 				color(0,0,255),
 				area(),
 				solid(),
@@ -137,22 +142,21 @@ scene("game", () => {
 		
 			"1": () => [
 				//crawler
-				rect(8,8),
-				color(0,255,255),
+				sprite("susan"),
 				area(),
 				body(),
 				"follower",
 				"killable",
 				"desBul",
 				{
-					spd:25,
-					dis:30,
+					spd:125,
+					dis:150,
 				}
 			],
 		
 			"2": () => [
 				//flyer
-				rect(8,8),
+				rect(40,40),
 				color(0,255,255),
 				area(),
 				solid(),
@@ -161,8 +165,8 @@ scene("game", () => {
 				"killable",
 				"desBul",
 				{
-					spd:40,
-					dis:100,
+					spd:200,
+					dis:500,
 					timer:0,
 					maxTimer:100,
 				}
@@ -170,18 +174,19 @@ scene("game", () => {
 	})
 	}
 
-	gravity(300)
+	gravity(1500)
 
 	//player object
 	const player = add([
-		rect(8,16),
-		pos(40,40),
+		rect(40,40),
+		sprite("susan"),
+		pos(200,200),
 		area(),
-		body({jumpForce:130,}),
+		body({jumpForce:650,}),
 		"killable",
 		
 		{
-			spd:100,
+			spd:500,
 			dir:"r",
 			
 		}
@@ -210,7 +215,7 @@ scene("game", () => {
 
 	onKeyPress("x",() => {
 		//player shoots bullet
-		createBullet(player.pos.x,player.pos.y+6,player.dir)
+		createBullet(player.pos.x,player.pos.y+15,player.dir)
 	})
 
 	//bullet stuff
@@ -254,9 +259,9 @@ scene("game", () => {
 	
 	onUpdate(() => {
 
-		if (player.pos.x - 64 > 0) {
+		if (player.pos.x - width()/2 > 0 && player.pos.x + width()/2 < levelWidth) {
 			//makes the camera centered on the player
-			camPos(player.pos.x,64)
+			camPos(player.pos.x,width()/2)
 		}
 	})
 })

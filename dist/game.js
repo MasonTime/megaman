@@ -2914,10 +2914,11 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
 
   // code/main.js
   no({
-    width: 128,
-    height: 128,
-    scale: 3
+    width: 640,
+    height: 640,
+    scale: 1
   });
+  loadSprite("susan", "sprites/susan.png");
   var levels = [
     [
       "================",
@@ -2975,39 +2976,41 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
     ]
   ];
   var levelLeng = levels.length;
+  var levelWidth = levelLeng * width();
   function createBullet(X, Y, dir) {
     let x;
     let DX;
     let DY;
     let y;
-    let spd = 200;
+    let spd = 1e3;
     switch (dir) {
       case "r":
-        x = X + 8;
+        x = X + 40;
         y = Y;
         DX = spd;
         DY = 0;
         break;
       case "l":
-        x = X - 4;
+        x = X - 40;
         y = Y;
         DX = -spd;
         DY = 0;
         break;
       case "u":
         x = X;
-        y = Y - 4;
+        y = Y - 40;
         DY = -spd;
         DX = 0;
         break;
       case "d":
         x = X;
-        y = Y + 12;
+        y = Y + 60;
         DY = spd;
         DX = 0;
     }
     add([
-      rect(4, 4),
+      rect(20, 20),
+      scale(0.5),
       color(0, 255, 0),
       area(),
       pos(x, y),
@@ -3022,31 +3025,30 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
   scene("game", () => {
     for (i = 0; i < levelLeng; i++) {
       addLevel(levels[i], {
-        width: 8,
-        height: 8,
-        pos: vec2(i * 128, 0),
+        width: 40,
+        height: 40,
+        pos: vec2(i * width(), 0),
         "=": () => [
-          rect(8, 8),
+          rect(40, 40),
           color(0, 0, 255),
           area(),
           solid(),
           "desBul"
         ],
         "1": () => [
-          rect(8, 8),
-          color(0, 255, 255),
+          sprite("susan"),
           area(),
           body(),
           "follower",
           "killable",
           "desBul",
           {
-            spd: 25,
-            dis: 30
+            spd: 125,
+            dis: 150
           }
         ],
         "2": () => [
-          rect(8, 8),
+          rect(40, 40),
           color(0, 255, 255),
           area(),
           solid(),
@@ -3055,23 +3057,24 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
           "killable",
           "desBul",
           {
-            spd: 40,
-            dis: 100,
+            spd: 200,
+            dis: 500,
             timer: 0,
             maxTimer: 100
           }
         ]
       });
     }
-    gravity(300);
+    gravity(1500);
     const player = add([
-      rect(8, 16),
-      pos(40, 40),
+      rect(40, 40),
+      sprite("susan"),
+      pos(200, 200),
       area(),
-      body({ jumpForce: 130 }),
+      body({ jumpForce: 650 }),
       "killable",
       {
-        spd: 100,
+        spd: 500,
         dir: "r"
       }
     ]);
@@ -3089,7 +3092,7 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
       player.dir = "r";
     });
     onKeyPress("x", () => {
-      createBullet(player.pos.x, player.pos.y + 6, player.dir);
+      createBullet(player.pos.x, player.pos.y + 15, player.dir);
     });
     onUpdate("bullet", (bullet) => {
       bullet.move(bullet.dx, bullet.dy);
@@ -3117,8 +3120,8 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
       }
     });
     onUpdate(() => {
-      if (player.pos.x - 64 > 0) {
-        camPos(player.pos.x, 64);
+      if (player.pos.x - width() / 2 > 0 && player.pos.x + width() / 2 < levelWidth) {
+        camPos(player.pos.x, width() / 2);
       }
     });
   });
